@@ -12,6 +12,7 @@
 #define DYWOQTEST_LIB_HAS_EXCEPTIONS 0
 #endif
 
+#if __cplusplus >= 202002LL
 namespace dywoqtest {
 
 class test_failure : public std::logic_error {
@@ -93,8 +94,18 @@ public:
   constexpr bool failed() const noexcept {
     return __got_data_.value != __expected_data_.value;
   }
+
+  // constexpr swap available since c++20
+  constexpr void swap(test<return_type> &__other) noexcept {
+    std::swap(__name_data_, __other.__name_data_);
+    std::swap(__got_data_, __other.__got_data_);
+    std::swap(__expected_data_, __other.__expected_data_);
+  }
+  friend constexpr void swap(test<return_type> &__first,
+                             test<return_type> &__second) noexcept;
 };
 
 } // namespace dywoqtest
+#endif
 
 #endif
