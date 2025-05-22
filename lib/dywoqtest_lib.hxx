@@ -3,7 +3,6 @@
 
 #include <concepts>
 #include <format>
-#include <source_location>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
@@ -22,14 +21,13 @@
 #endif
 
 #if __cplusplus >= 202302L
-#define DYWOQTEST_LIB_CONCEPT_FORMATTABLE(type, chart) &&std::formattable<#type, #chart>
+#define DYWOQTEST_LIB_CONCEPT_FORMATTABLE(type, chart) &&std::formattable<type, chart>
 #else
 #define DYWOQTEST_LIB_CONCEPT_FORMATTABLE(type, chart)
 #endif
 
 #if !DYWOQTEST_LIB_HAS_EXCEPTIONS
-#include <exceptions>
-#include <iostream>
+#include <iostream> // <exceptions> is not a standard header, replaced with iostream
 #endif
 
 #if __cplusplus >= 202002LL
@@ -147,8 +145,10 @@ public:
   DYWOQTEST_LIB_CONCEPT_FORMATTABLE(_Rt, char)
   static void error(const char *__name, _Rt __got,
                     _Rt __expected) DYWOQTEST_LIB_NOEXCEPT {
-    std::string __fmt_msg = std::format("test failed (name: {}) got {}, expected {}",
-                                        __name, __got, __expected);
+    std::string __name_str = __name;
+    std::string __fmt_msg =
+        std::format("test failed (name: {}) got {}, expected {}",
+                    !__name_str.empty() ? __name : "no name", __got, __expected);
     test_failure __err(__fmt_msg);
     __err.__throw();
   }
@@ -156,17 +156,17 @@ public:
   template <typename... _Args>
   static void error(std::format_string<_Args...> __fmt,
                     _Args &&...__args) DYWOQTEST_LIB_NOEXCEPT {
-    std::string __fmt_msg = std::format(__fmt, std::forward<_Args>()...);
+    std::string __fmt_msg = std::format(__fmt, std::forward<_Args>(__args)...);
     test_failure __err(__fmt_msg);
     __err.__throw();
   }
 
-  template <typename... _Args>
-  static void error(const std::string __msg) DYWOQTEST_LIB_NOEXCEPT {
+  template <typename _MsgType>
+  static void error(const std::string &__msg) DYWOQTEST_LIB_NOEXCEPT {
     error("{}", __msg);
   }
 
-  template <typename... _Args>
+  template <typename _MsgType>
   static void error(const char *__msg) DYWOQTEST_LIB_NOEXCEPT {
     error("{}", __msg);
   }
@@ -174,31 +174,17 @@ public:
   template <typename _Rt>
     requires std::equality_comparable<_Rt>
   DYWOQTEST_LIB_CONCEPT_FORMATTABLE(_Rt, char)
-  static void error(const char *__name, _Rt __got, _Rt __expected,
-                    const std::source_location &__source_location =
-                        std::source_location::current()) DYWOQTEST_LIB_NOEXCEPT {
-    std::string __fmt_msg =
-        std::format("test failed at {}:{} (name: {}) got {}, expected {}",
-                    __source_location.file_name(), __source_location.line(), __name,
-                    __got, __expected);
-    test_failure __err(__fmt_msg);
-    __err.__throw();
-  }
-
-  template <typename _Rt, typename... _Args>
-    requires std::equality_comparable<_Rt>
-  DYWOQTEST_LIB_CONCEPT_FORMATTABLE(_Rt, char)
   static void run(const test<_Rt> __test) DYWOQTEST_LIB_NOEXCEPT {
     if (__test.failed())
-      error(__test);
+      error(__test.name(), __test.got(), __test.expected());
   }
 
-  template <typename _Rt, typename... _Args>
+  template <typename _Rt>
     requires std::equality_comparable<_Rt>
   DYWOQTEST_LIB_CONCEPT_FORMATTABLE(_Rt, char)
   static void run(const char *__name, _Rt __got, _Rt __expected) DYWOQTEST_LIB_NOEXCEPT {
     if (__got != __expected)
-      error(test<_Rt>(__name, __got, __expected));
+      error(__name, __got, __expected);
   }
 
   template <typename _Rt, typename... _Args>
