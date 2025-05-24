@@ -18,7 +18,7 @@
 
 #if defined(__cpp_exceptions)
 #define DYWOQTEST_LIB_HAS_EXCEPTIONS 1
-#elif
+#else
 #define DYWOQTEST_LIB_HAS_EXCEPTIONS 0
 #endif
 
