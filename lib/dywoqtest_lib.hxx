@@ -1,3 +1,11 @@
+/**
+										dywoqtest (C++)
+
+	Part of repository: https://github.com/dywoq/dywoqtest
+	Under Apache License 2.0
+
+	Copyright - 2025 dywoq
+*/
 #ifndef DYWOQTEST_LIB
 #define DYWOQTEST_LIB
 
@@ -27,7 +35,8 @@
 #endif
 
 #if !DYWOQTEST_LIB_HAS_EXCEPTIONS
-#include <iostream> // <exceptions> is not a standard header, replaced with iostream
+#include <iostream>
+#include <exceptions>
 #endif
 
 #if __cplusplus >= 202002LL
