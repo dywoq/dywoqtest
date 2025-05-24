@@ -36,7 +36,7 @@
 
 #if !DYWOQTEST_LIB_HAS_EXCEPTIONS
 #include <iostream>
-#include <exceptions>
+#include <exception>
 #endif
 
 #if __cplusplus >= 202002LL
